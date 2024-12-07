@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button"
 import NameStep from './name-step'
 import DescriptionStep from './description-step'
 import AudienceStep from './audience-step'
-import GenerationOptions from './generation-options'
 import ProgressBar from './progress-bar'
 import StatusSidebar from './status-sidebar'
+import { useUser } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
 
 type ProjectData = {
   name: string
@@ -20,21 +21,52 @@ const steps = [
   { name: "Project Name", completed: false },
   { name: "Description", completed: false },
   { name: "Target Audience", completed: false },
-  { name: "Generation Options", completed: false },
+  { name: "Finalize", completed: false },
 ]
 
 export default function ProjectCreator() {
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(1);
+  const router = useRouter()
+
   const [projectData, setProjectData] = useState<ProjectData>({
     name: '',
     description: '',
     audience: '',
   })
+
   const [completedSteps, setCompletedSteps] = useState(steps)
+  const { user } = useUser()
 
   const totalSteps = steps.length
 
-  const handleNext = () => {
+  const handleCreateProject = async () => {
+    const response = await fetch('/api/project', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: projectData.name,
+        description: projectData.description,
+        audience: projectData.audience,
+        userId: user?.id
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    const body = await response.json();
+    if (response.ok) {
+      router.push(`/projects/${body.id}`)
+    } else {
+      alert('Project could not be created')
+    }
+  }
+
+  const handleNext = async () => {
+
+    if (step === 4) {
+      await handleCreateProject();
+    }
+
     setStep((prevStep) => {
       const newStep = Math.min(prevStep + 1, totalSteps)
       updateCompletedSteps(prevStep)
@@ -84,13 +116,23 @@ export default function ProjectCreator() {
               updateAudience={(value) => updateProjectData('audience', value)}
             />
           )}
-          {step === 4 && <GenerationOptions />}
+          {step === 4 &&
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">Project overview</h2>
+              <div className="flex flex-col gap-2 px-2">
+                <h1><span className="text-muted-foreground">Project Name:</span> {projectData.name}</h1>
+                <h1><span className="text-muted-foreground">Description:</span> {projectData.description}</h1>
+                <h1><span className="text-muted-foreground">Audience:</span> {projectData.audience}</h1>
+              </div>
+            </div>
+          }
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button onClick={handleBack} disabled={step === 1}>
             Back
           </Button>
-          <Button onClick={handleNext} disabled={step === totalSteps}>
+          <Button onClick={handleNext} disabled={step === totalSteps + 1}>
+
             {step === totalSteps ? 'Finish' : 'Next'}
           </Button>
         </CardFooter>
@@ -100,7 +142,7 @@ export default function ProjectCreator() {
           <StatusSidebar steps={completedSteps} currentStep={step} />
         </CardContent>
       </Card>
-    </div>
+    </div >
   )
 }
 
