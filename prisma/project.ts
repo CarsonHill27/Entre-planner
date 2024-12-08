@@ -34,3 +34,16 @@ export async function getOneProject(id: string) {
         }
     })
 }
+
+export async function updateProjectImages(id: string, images: string[]) {
+    return await prisma.project.update({
+        where: {
+            id
+        },
+        data: {
+            images: {
+                push: images
+            }
+        }
+    })
+}

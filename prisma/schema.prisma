@@ -21,4 +21,5 @@ model Project {
   name        String
   description String
   audience    String
+  images      String[]
 }

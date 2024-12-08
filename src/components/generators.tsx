@@ -17,11 +17,37 @@ import { useState } from "react";
 import { Button } from "./ui/button";
 
 
-export function LogoGenerator() {
+export function LogoGenerator({ id }: { id: string }) {
 
     const [color, setColor] = useState('#000000')
     const [style, setStyle] = useState('')
     const [description, setDescription] = useState('')
+
+    const [imageUrl, setImageUrl] = useState("");
+    const [isLoading, setLoading] = useState(false);
+
+    const generateLogo = async () => {
+        setLoading(true);
+
+        const response = await fetch('/api/openai/image', {
+            method: 'POST',
+            body: JSON.stringify({ color, style, description }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const res = await fetch('/api/project/update-image', {
+                method: 'POST',
+                body: JSON.stringify({ images: data.data[0].url, id: id }),
+            }
+            )
+            setImageUrl(data.data[0].url);
+            setLoading(false);
+        }
+
+        setLoading(false);
+    }
+
 
 
     return (
@@ -38,46 +64,61 @@ export function LogoGenerator() {
                 <DialogHeader>
                     <DialogTitle>Logo Generator</DialogTitle>
                     <DialogDescription>
-                        This action cannot be undone. This will permanently delete your account
-                        and remove your data from our servers.
+                        Create a logo for your project using the OpenAI API
                     </DialogDescription>
 
-                    <div className="space-y-4">
-                        <div>
-                            <Label htmlFor="color">Color</Label>
-                            <Input
-                                id="color"
-                                type="color"
-                                value={color}
-                                onChange={(e) => setColor(e.target.value)}
-                                className="h-10 w-20"
-                            />
+
+                    <div className="space-y-4 flex gap-4">
+                        <div className="flex gap-4 flex-col">
+                            <div>
+                                <Label htmlFor="color">Color</Label>
+                                <Input
+                                    id="color"
+                                    type="color"
+                                    value={color}
+                                    onChange={(e) => setColor(e.target.value)}
+                                    className="h-10 w-20"
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="style">Style</Label>
+                                <Select value={style} onValueChange={setStyle}>
+                                    <SelectTrigger id="style">
+                                        <SelectValue placeholder="Select a style" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="2d">2D</SelectItem>
+                                        <SelectItem value="3d">3D</SelectItem>
+                                        <SelectItem value="flat">Flat</SelectItem>
+                                        <SelectItem value="vector">Vector</SelectItem>
+                                        <SelectItem value="minimalist">Minimalist</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label htmlFor="description">Description</Label>
+                                <Input
+                                    id="description"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    placeholder="Enter a short description of your logo"
+                                />
+                            </div>
+                            <Button disabled={isLoading} onClick={generateLogo}>
+                                {isLoading ? "Generating..." : "Generate Logo"}
+                            </Button>
+
+                            <div>
+
+
+
+                                {imageUrl && (
+                                    <img src={imageUrl} alt="Generated Logo" className="mt-4" />
+                                )}
+                            </div>
                         </div>
-                        <div>
-                            <Label htmlFor="style">Style</Label>
-                            <Select value={style} onValueChange={setStyle}>
-                                <SelectTrigger id="style">
-                                    <SelectValue placeholder="Select a style" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="2d">2D</SelectItem>
-                                    <SelectItem value="flat">Flat</SelectItem>
-                                    <SelectItem value="vector">Vector</SelectItem>
-                                    <SelectItem value="minimalist">Minimalist</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <Label htmlFor="description">Description</Label>
-                            <Input
-                                id="description"
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                placeholder="Enter a short description of your logo"
-                            />
-                        </div>
-                        <Button>Generate Logo</Button>
                     </div>
+
                 </DialogHeader>
             </DialogContent>
         </Dialog>
@@ -85,7 +126,7 @@ export function LogoGenerator() {
     )
 }
 
-export function SloganGenerator() {
+export function SloganGenerator({ id }: { id: string }) {
     return (
         <Dialog>
             <DialogTrigger>
@@ -110,7 +151,7 @@ export function SloganGenerator() {
 }
 
 
-export function GoalGenerator() {
+export function GoalGenerator({ id }: { id: string }) {
     return (
         <Dialog>
             <DialogTrigger>
