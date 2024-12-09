@@ -44,7 +44,7 @@ export default async function Page() {
                             <CardTitle>{project.name}</CardTitle>
                             <CardDescription>Created {project.createdAt.toLocaleDateString()}</CardDescription>
                             <img
-                                src={'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkq-tJFjSCXGV6pAamnW8U7VIK_R4vHmafQA&s'}
+                                src={`${project.images[0]}`}
                                 alt="Project Thumbnail"
                                 className="absolute top-0 right-0 w-16 h-16 object-cover rounded-full m-2"
                             />
