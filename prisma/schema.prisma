@@ -22,4 +22,6 @@ model Project {
   description String
   audience    String
   images      String[]
+  slogan      String?
+  goals       String?
 }

@@ -15,6 +15,7 @@ import Link from "next/link"
 import { PlusIcon } from "lucide-react"
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { getUserProjects } from "../../../prisma/project"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export default async function Page() {
 
@@ -37,24 +38,35 @@ export default async function Page() {
                 </Link>
             </div>
 
+            {projects.length === 0 && (
+                <div>
+                    <p className="text-3xl">You don't have any projects yet!</p>
+                </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+
                 {projects.map((project) => (
-                    <Card key={project.id} className="max-w-sm relative">
-                        <CardHeader>
-                            <CardTitle>{project.name}</CardTitle>
-                            <CardDescription>Created {project.createdAt.toLocaleDateString()}</CardDescription>
-                            <img
-                                src={`${project.images[0]}`}
-                                alt="Project Thumbnail"
-                                className="absolute top-0 right-0 w-16 h-16 object-cover rounded-full m-2"
-                            />
+                    <Card key={project.id} className="max-w-sm relative h-full">
+                        <CardHeader className="">
+                            <div className="flex justify-between">
+                                <div>
+                                    <CardTitle>{project.name}</CardTitle>
+                                    <CardDescription>Created {project.createdAt.toLocaleDateString()}</CardDescription>
+                                </div>
+                                <Avatar className="">
+                                    <AvatarFallback>
+                                        {project.name[0]}{project.name[project.name.length - 1]}
+                                    </AvatarFallback>
+                                </Avatar>
+                            </div>
                         </CardHeader>
-                        <CardContent>
-                            <p>{project.description}</p>
+                        <CardContent className="flex-grow">
+                            <p className="line-clamp-3">{project.description}</p>
                         </CardContent>
                         <CardFooter className="justify-end">
                             <Link href={`/projects/${project.id}`}>
-                                <Button>View Project</Button>
+                                <Button variant={'secondary'}>View Project</Button>
                             </Link>
                         </CardFooter>
                     </Card>

@@ -47,3 +47,25 @@ export async function updateProjectImages(id: string, images: string[]) {
         }
     })
 }
+
+export async function updateProjectSlogan(id: string, slogan: string) {
+    return await prisma.project.update({
+        where: {
+            id
+        },
+        data: {
+            slogan
+        }
+    })
+}
+
+export async function updateProjectGoals(id: string, goals: string) {
+    return await prisma.project.update({
+        where: {
+            id
+        },
+        data: {
+            goals
+        }
+    })
+}

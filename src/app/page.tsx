@@ -16,11 +16,15 @@ export default function Home() {
         <p className="text-lg mb-8">Your ultimate tool for planning and managing your entrepreneurial journey.</p>
         {isSignedIn ?
           <Link href="/projects">
-            <Button>View Projects</Button>
+            <Button size="lg">View Projects</Button>
           </Link> :
           <div className="flex space-x-4 justify-center">
-            <SignInButton />
-            <SignUpButton />
+            <SignInButton>
+              <Button size={'lg'} variant={'secondary'}>
+                Sign-in
+              </Button>
+            </SignInButton>
+
           </div>
         }
       </div>

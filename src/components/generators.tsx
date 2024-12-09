@@ -15,6 +15,8 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { useState } from "react";
 import { Button } from "./ui/button";
+import { useRouter } from "next/navigation";
+import { Textarea } from "@/components/ui/textarea"
 
 
 export function LogoGenerator({ id }: { id: string }) {
@@ -25,6 +27,7 @@ export function LogoGenerator({ id }: { id: string }) {
 
     const [imageUrl, setImageUrl] = useState("");
     const [isLoading, setLoading] = useState(false);
+    const router = useRouter();
 
     const generateLogo = async () => {
         setLoading(true);
@@ -48,10 +51,8 @@ export function LogoGenerator({ id }: { id: string }) {
         setLoading(false);
     }
 
-
-
     return (
-        <Dialog>
+        <Dialog onOpenChange={() => router.refresh()}>
             <DialogTrigger>
                 <Card className="hover:bg-primary/50 hover:border-primary hover:cursor-pointer  ">
                     <CardHeader>
@@ -126,52 +127,131 @@ export function LogoGenerator({ id }: { id: string }) {
     )
 }
 
-export function SloganGenerator({ id }: { id: string }) {
+export function SloganGenerator({ id, description }: { id: string, description: string }) {
+    const [keywords, setKeywords] = useState('');
+    const [slogan, setSlogan] = useState('');
+    const [isLoading, setLoading] = useState(false);
+    const router = useRouter();
+
+    const generateSlogan = async () => {
+        setLoading(true);
+
+        const response = await fetch('/api/openai/slogan', {
+            method: 'POST',
+            body: JSON.stringify({ id, keywords, description }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            setSlogan(data);
+        }
+
+        setLoading(false);
+    };
+
     return (
-        <Dialog>
+        <Dialog onOpenChange={() => router.refresh()}>
             <DialogTrigger>
-                <Card className="hover:bg-pink-500/50 hover:border-pink-500 hover:cursor-pointer ">
+                <Card className="hover:bg-pink-500/50 hover:border-pink-500 hover:cursor-pointer">
                     <CardHeader>
-                        <h1 className="text-xl flex items-center gap-2"> <Sparkle /> Slogan Creator</h1>
+                        <h1 className="text-xl flex items-center gap-2"><Sparkle /> Slogan Creator</h1>
                         <h2 className="text-muted-foreground">Generate a slogan for your project</h2>
                     </CardHeader>
                 </Card>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Are you absolutely sure?</DialogTitle>
+                    <DialogTitle>Slogan Generator</DialogTitle>
                     <DialogDescription>
-                        This action cannot be undone. This will permanently delete your account
-                        and remove your data from our servers.
+                        Create a slogan for your project using the OpenAI API
                     </DialogDescription>
+                    <div className="space-y-4 flex gap-4">
+                        <div className="flex gap-4 flex-col">
+                            <div>
+                                <Label htmlFor="keywords">Keywords</Label>
+                                <Input
+                                    className=""
+                                    id="keywords"
+                                    value={keywords}
+                                    onChange={(e) => setKeywords(e.target.value)}
+                                    placeholder="Epic, Fire, Swag"
+                                />
+                            </div>
+                            <Button disabled={isLoading} onClick={generateSlogan}>
+                                {isLoading ? "Generating..." : "Generate Slogan"}
+                            </Button>
+                            <div>
+                                {slogan && (
+                                    <p className="mt-4">{slogan}</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 </DialogHeader>
             </DialogContent>
         </Dialog>
-    )
+    );
 }
 
 
 export function GoalGenerator({ id }: { id: string }) {
+    const [keywords, setKeywords] = useState('');
+    const [goal, setGoal] = useState('');
+    const [isLoading, setLoading] = useState(false);
+    const router = useRouter();
+
+    const generateGoal = async () => {
+        setLoading(true);
+
+        const response = await fetch('/api/openai/goal', {
+            method: 'POST',
+            body: JSON.stringify({ id, keywords }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            setGoal(data);
+        }
+
+        setLoading(false);
+    };
+
     return (
-        <Dialog>
+        <Dialog onOpenChange={() => router.refresh()}>
             <DialogTrigger>
-                <Card className="hover:bg-orange-500/50 hover:border-orange-500 hover:cursor-pointer ">
+                <Card className="hover:bg-orange-500/50 hover:border-orange-500 hover:cursor-pointer">
                     <CardHeader>
-                        <h1 className="text-xl flex items-center gap-2"> <Sparkle /> Goal Creator</h1>
+                        <h1 className="text-xl flex items-center gap-2"><Sparkle /> Goal Creator</h1>
                         <h2 className="text-muted-foreground">Generate goals for your project</h2>
                     </CardHeader>
                 </Card>
             </DialogTrigger>
-
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Are you absolutely sure?</DialogTitle>
+                    <DialogTitle>Goal Generator</DialogTitle>
                     <DialogDescription>
-                        This action cannot be undone. This will permanently delete your account
-                        and remove your data from our servers.
+                        Create goals for your project using the OpenAI API
                     </DialogDescription>
+                    <div className="space-y-4 flex gap-4">
+                        <div className="flex gap-4 flex-col w-full">
+                            <div>
+                                <Label htmlFor="keywords">Goals</Label>
+                                <Textarea
+                                    className="w-full"
+                                    id="keywords"
+                                    value={keywords}
+                                    onChange={(e) => setKeywords(e.target.value)}
+                                    placeholder="Enter a 100-150 word description of your projects goals and outlines here"
+                                />
+                            </div>
+                            <Button disabled={isLoading} onClick={generateGoal}>
+                                {isLoading ? "Generating..." : "Generate Goals"}
+                            </Button>
+
+                        </div>
+                    </div>
                 </DialogHeader>
             </DialogContent>
         </Dialog>
-    )
+    );
 }
